@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Energia Pomeriggio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --card-bg: #FFFFFF;
+    --text: #2B2620;
+    --text-soft: #6B6255;
+    --energia-alta: #7A9471;
+    --energia-media: #C9A227;
+    --energia-bassa: #5F7C99;
+    --priorita-alta: #E8543D;
+    --border-soft: #E8E1D4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .titolo {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: 100px;
+  }
+
+  .schermata { display: none; }
+  .schermata.attiva { display: block; }
+
+  /* ---------- BANNER BACKUP ---------- */
+  .banner-backup {
+    background: #FCEFD9;
+    border: 1px solid #E8C77E;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--text);
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .banner-backup.visibile { display: flex; }
+
+  .banner-backup button {
+    background: var(--text);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* ---------- HOME ---------- */
+  .home-titolo {
+    font-size: 24px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .bottone-macro {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-soft);
+    border-radius: 20px;
+    padding: 22px;
+    margin-bottom: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--text);
+    text-align: left;
+    box-shadow: 0 2px 8px rgba(43,38,32,0.06);
+  }
+
+  .bottone-macro:active { transform: scale(0.98); }
+
+  .bottone-mostra-tutto {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-soft);
+    font-size: 14px;
+    padding: 14px;
+    text-decoration: underline;
+    margin-top: 8px;
+  }
+
+  /* ---------- CARD TASK ---------- */
+  .card-task {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 28px;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(43,38,32,0.08);
+    margin-top: 40px;
+  }
+
+  .card-task.priorita-alta {
+    border: 3px solid var(--priorita-alta);
+  }
+
+  .label-priorita-alta {
+    display: inline-block;
+    background: var(--priorita-alta);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 100px;
+    margin-bottom: 14px;
+    align-self: flex-start;
+  }
+
+  .card-task-titolo {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .card-task-desc {
+    font-size: 14px;
+    color: var(--text-soft);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .card-task-tag {
+    display: inline-block;
+    font-size: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border-soft);
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-right: 6px;
+    color: var(--text-soft);
+  }
+
+  .card-azioni {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  .btn-azione {
+    flex: 1;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .btn-fatto {
+    background: var(--energia-alta);
+    color: white;
+  }
+
+  .btn-non-ora {
+    background: var(--bg);
+    color: var(--text-soft);
+    border: 1px solid var(--border-soft);
+  }
+
+  .nessun-task {
+    text-align: center;
+    color: var(--text-soft);
+    padding: 60px 20px;
+  }
+
+  /* ---------- CATTURA RAPIDA ---------- */
+  .bottone-piu {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--text);
+    color: white;
+    font-size: 28px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(43,38,32,0.25);
+    z-index: 100;
+  }
+
+  .overlay-cattura {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 200;
+    padding: 20px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .overlay-cattura.attiva { display: block; }
+
+  .cattura-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .btn-chiudi {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--text-soft);
+  }
+
+  .campo-titolo {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft);
+    font-size: 17px;
+    font-family: 'Inter', sans-serif;
+    background: var(--card-bg);
+    margin-bottom: 16px;
+  }
+
+  .campo-desc {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    background: var(--card-bg);
+    min-height: 90px;
+    resize: vertical;
+    margin-bottom: 20px;
+  }
+
+  .campo-orario {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border-soft);
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    background: var(--card-bg);
+    margin-bottom: 20px;
+  }
+
+  .gruppo-label {
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .gruppo-bottoni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .chip {
+    padding: 10px 16px;
+    border-radius: 100px;
+    border: 1px solid var(--border-soft);
+    background: var(--card-bg);
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .chip.selezionato {
+    background: var(--text);
+    color: white;
+    border-color: var(--text);
+  }
+
+  /* ---------- REVISIONE ---------- */
+  .header-schermata {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .btn-indietro {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: var(--text-soft);
+  }
+
+  .bottone-revisione {
+    position: fixed;
+    top: 20px;
+    right: 76px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: var(--text-soft);
+    z-index: 100;
+  }
+
+  .bottone-impostazioni {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: var(--text-soft);
+    z-index: 100;
+  }
+
+  .task-revisione {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-soft);
+  }
+
+  .task-revisione-titolo {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .task-revisione-info {
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-bottom: 12px;
+  }
+
+  .task-revisione-azioni {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-piccolo {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .btn-piccolo.elimina {
+    color: var(--priorita-alta);
+    border-color: var(--priorita-alta);
+  }
+
+  .nessun-peso-morto {
+    text-align: center;
+    color: var(--text-soft);
+    padding: 60px 20px;
+  }
+
+  /* ---------- IMPOSTAZIONI ---------- */
+  .blocco-impostazioni {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-soft);
+  }
+
+  .blocco-impostazioni-titolo {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .blocco-impostazioni-desc {
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .btn-impostazioni {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-soft);
+    background: var(--bg);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .btn-impostazioni.principale {
+    background: var(--text);
+    color: white;
+    border: none;
+  }
+
+  .stato-notifiche {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 6px;
+  }
+
+  /* ---------- LOOP CAZZEGGIO ---------- */
+  .overlay-cazzeggio {
+    position: fixed;
+    inset: 0;
+    background: var(--priorita-alta);
+    z-index: 300;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .overlay-cazzeggio.attiva {
+    display: flex;
+  }
+
+  .cazzeggio-testo {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    color: white;
+    margin-bottom: 20px;
+  }
+
+  .cazzeggio-sottotesto {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 40px;
+    opacity: 0.9;
+  }
+
+  .btn-chiudi-cazzeggio {
+    background: white;
+    color: var(--priorita-alta);
+    border: none;
+    padding: 16px 32px;
+    border-radius: 100px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .btn-salva {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    border: none;
+    background: var(--energia-alta);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SCHERMATA HOME -->
+  <div class="schermata attiva" id="schermata-home">
+    <div class="banner-backup" id="banner-backup">
+      <span>Non fai un backup da un po'. Vuoi farlo ora?</span>
+      <button onclick="apriImpostazioni()">Vai</button>
+    </div>
+    <div class="home-titolo titolo">Come stai adesso?</div>
+    <button class="bottone-macro" onclick="proponiTask('casa')">🏠 Sono a casa, stanco/a</button>
+    <button class="bottone-macro" onclick="proponiTask('computer')">💻 Sono al PC</button>
+    <button class="bottone-macro" onclick="proponiTask('quindici')">⏱️ Ho 15 minuti</button>
+    <button class="bottone-mostra-tutto" onclick="mostraTutti()">Mostrami tutto</button>
+  </div>
+
+  <!-- SCHERMATA CARD TASK -->
+  <div class="schermata" id="schermata-card">
+    <div id="contenitore-card"></div>
+  </div>
+
+  <!-- SCHERMATA REVISIONE -->
+  <div class="schermata" id="schermata-revisione">
+    <div class="header-schermata">
+      <button class="btn-indietro" onclick="chiudiRevisione()">←</button>
+      <div class="titolo" style="font-size:20px;">Revisione</div>
+    </div>
+    <div id="contenitore-revisione"></div>
+  </div>
+
+  <!-- SCHERMATA IMPOSTAZIONI -->
+  <div class="schermata" id="schermata-impostazioni">
+    <div class="header-schermata">
+      <button class="btn-indietro" onclick="chiudiImpostazioni()">←</button>
+      <div class="titolo" style="font-size:20px;">Impostazioni</div>
+    </div>
+
+    <div class="blocco-impostazioni">
+      <div class="blocco-impostazioni-titolo">Notifiche</div>
+      <div class="blocco-impostazioni-desc">Ricevi un promemoria con il task giusto nelle fasce orarie del pomeriggio (15-17, 17-19:30, 19:30-21), nei giorni feriali. Funziona solo se tieni l'app aperta o in una scheda del browser.</div>
+      <button class="btn-impostazioni principale" onclick="attivaNotifiche()">Attiva notifiche</button>
+      <div class="stato-notifiche" id="stato-notifiche">Stato: da attivare</div>
+    </div>
+
+    <div class="blocco-impostazioni">
+      <div class="blocco-impostazioni-titolo">Backup dei tuoi dati</div>
+      <div class="blocco-impostazioni-desc">I tuoi promemoria sono salvati solo su questo telefono. Scarica un backup ogni tanto per non perderli, e caricalo se cambi dispositivo.</div>
+      <button class="btn-impostazioni principale" onclick="scaricaBackup()">Scarica backup</button>
+      <button class="btn-impostazioni" onclick="document.getElementById('input-backup').click()">Carica backup</button>
+      <input type="file" id="input-backup" accept="application/json" style="display:none" onchange="caricaBackup(event)">
+      <div class="stato-notifiche" id="stato-ultimo-backup"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTONE + FISSO -->
+<button class="bottone-piu" onclick="apriCattura()">+</button>
+<button class="bottone-revisione" onclick="apriRevisione()">📋</button>
+<button class="bottone-impostazioni" onclick="apriImpostazioni()">⚙️</button>
+
+<!-- OVERLAY CATTURA RAPIDA -->
+<div class="overlay-cattura" id="overlay-cattura">
+  <div class="cattura-header">
+    <div class="titolo" style="font-size:20px;">Nuovo promemoria</div>
+    <button class="btn-chiudi" onclick="chiudiCattura()">✕</button>
+  </div>
+
+  <input type="text" id="input-titolo" class="campo-titolo" placeholder="Cosa devi fare?">
+  <textarea id="input-desc" class="campo-desc" placeholder="Descrizione dettagliata (facoltativa)"></textarea>
+
+  <div class="gruppo-label">Contesto (facoltativo)</div>
+  <div class="gruppo-bottoni" id="gruppo-contesto">
+    <button class="chip" data-val="casa">Casa</button>
+    <button class="chip" data-val="telefono">Al telefono</button>
+    <button class="chip" data-val="computer">Al computer</button>
+    <button class="chip" data-val="fuori">Fuori casa</button>
+    <button class="chip" data-val="progetti">Progetti</button>
+  </div>
+
+  <div class="gruppo-label">Energia richiesta (facoltativo)</div>
+  <div class="gruppo-bottoni" id="gruppo-energia">
+    <button class="chip" data-val="alta">Alta</button>
+    <button class="chip" data-val="media">Media</button>
+    <button class="chip" data-val="bassa">Batteria scarica</button>
+  </div>
+
+  <div class="gruppo-label">Priorità</div>
+  <div class="gruppo-bottoni" id="gruppo-priorita">
+    <button class="chip" data-val="alta">Alta</button>
+    <button class="chip selezionato" data-val="media">Media</button>
+    <button class="chip" data-val="bassa">Bassa</button>
+  </div>
+
+  <div class="gruppo-label">Non proporlo prima delle... (facoltativo)</div>
+  <input type="time" id="input-orario" class="campo-orario">
+
+  <button class="btn-salva" onclick="salvaTask()">Salva</button>
+</div>
+
+<!-- OVERLAY LOOP CAZZEGGIO -->
+<div class="overlay-cazzeggio" id="overlay-cazzeggio">
+  <div class="cazzeggio-testo">Stai cazzeggiando troppo</div>
+  <div class="cazzeggio-sottotesto">Hai rinviato tanti task di fila. Fermati un attimo.</div>
+  <button class="btn-chiudi-cazzeggio" onclick="chiudiCazzeggio()">Ho capito</button>
+</div>
+
+<script>
+  // ---------- GESTIONE DATI (LocalStorage) ----------
+  function caricaTask() {
+    const dati = localStorage.getItem('tasks');
+    return dati ? JSON.parse(dati) : [];
+  }
+
+  function salvaTaskLista(lista) {
+    localStorage.setItem('tasks', JSON.stringify(lista));
+  }
+
+  // ---------- CATTURA RAPIDA ----------
+  function apriCattura() {
+    document.getElementById('overlay-cattura').classList.add('attiva');
+  }
+
+  function chiudiCattura() {
+    document.getElementById('overlay-cattura').classList.remove('attiva');
+    resetFormCattura();
+  }
+
+  document.querySelectorAll('#gruppo-contesto .chip, #gruppo-energia .chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const giaSelezionato = btn.classList.contains('selezionato');
+      btn.parentElement.querySelectorAll('.chip').forEach(b => b.classList.remove('selezionato'));
+      if (!giaSelezionato) btn.classList.add('selezionato');
+    });
+  });
+
+  document.querySelectorAll('#gruppo-priorita .chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.parentElement.querySelectorAll('.chip').forEach(b => b.classList.remove('selezionato'));
+      btn.classList.add('selezionato');
+    });
+  });
+
+  function resetFormCattura() {
+    document.getElementById('input-titolo').value = '';
+    document.getElementById('input-desc').value = '';
+    document.getElementById('input-orario').value = '';
+    document.querySelectorAll('#gruppo-contesto .chip, #gruppo-energia .chip').forEach(b => b.classList.remove('selezionato'));
+    document.querySelectorAll('#gruppo-priorita .chip').forEach(b => b.classList.remove('selezionato'));
+    document.querySelector('#gruppo-priorita .chip[data-val="media"]').classList.add('selezionato');
+  }
+
+  function salvaTask() {
+    const titolo = document.getElementById('input-titolo').value.trim();
+    if (!titolo) {
+      alert('Il titolo è obbligatorio.');
+      return;
+    }
+    const desc = document.getElementById('input-desc').value.trim();
+    const orario = document.getElementById('input-orario').value;
+    const contestoBtn = document.querySelector('#gruppo-contesto .chip.selezionato');
+    const energiaBtn = document.querySelector('#gruppo-energia .chip.selezionato');
+    const prioritaBtn = document.querySelector('#gruppo-priorita .chip.selezionato');
+
+    const nuovoTask = {
+      id: Date.now(),
+      titolo: titolo,
+      descrizione: desc,
+      contesto: contestoBtn ? contestoBtn.dataset.val : null,
+      energia: energiaBtn ? energiaBtn.dataset.val : null,
+      priorita: prioritaBtn ? prioritaBtn.dataset.val : 'media',
+      orarioSpecifico: orario || null,
+      rifiuti: 0,
+      completato: false
+    };
+
+    const lista = caricaTask();
+    lista.push(nuovoTask);
+    salvaTaskLista(lista);
+
+    chiudiCattura();
+    alert('Promemoria salvato!');
+  }
+
+  // ---------- HOME → PROPOSTA TASK ----------
+  let filtroAttuale = null;
+  let swipeConsecutivi = 0;
+
+  function proponiTask(tipo) {
+    filtroAttuale = tipo;
+    document.getElementById('schermata-home').classList.remove('attiva');
+    document.getElementById('schermata-card').classList.add('attiva');
+    mostraProssimoTask();
+  }
+
+  function filtraTaskPerTipo(lista, tipo) {
+    if (tipo === 'casa') return lista.filter(t => t.contesto === 'casa' || t.energia === 'bassa');
+    if (tipo === 'computer') return lista.filter(t => t.contesto === 'computer');
+    if (tipo === 'quindici') return lista;
+    return lista;
+  }
+
+  function minutiAdesso() {
+    const ora = new Date();
+    return ora.getHours() * 60 + ora.getMinutes();
+  }
+
+  function rispettaOrario(task) {
+    const minutiAttuali = minutiAdesso();
+
+    if (task.contesto === 'telefono' && minutiAttuali >= (17 * 60 + 30)) return false;
+    if (task.contesto === 'fuori' && minutiAttuali >= (19 * 60)) return false;
+
+    if (task.orarioSpecifico) {
+      const [h, m] = task.orarioSpecifico.split(':').map(Number);
+      const minutiRichiesti = h * 60 + m;
+      if (minutiAttuali < minutiRichiesti) return false;
+    }
+
+    return true;
+  }
+
+  function mostraProssimoTask() {
+    const lista = caricaTask().filter(t => !t.completato && !isPesoMorto(t) && rispettaOrario(t));
+    const filtrati = filtroAttuale ? filtraTaskPerTipo(lista, filtroAttuale) : lista;
+
+    const contenitore = document.getElementById('contenitore-card');
+
+    if (filtrati.length === 0) {
+      contenitore.innerHTML = `
+        <div class="nessun-task">
+          <p class="titolo" style="font-size:18px; margin-bottom:8px;">Nessun task disponibile</p>
+          <p>Non ci sono promemoria adatti a questo momento.</p>
+          <button class="bottone-mostra-tutto" onclick="tornaHome()">← Torna indietro</button>
+        </div>
+      `;
+      return;
+    }
+
+    filtrati.sort((a, b) => {
+      const peso = { alta: 0, media: 1, bassa: 2 };
+      return peso[a.priorita] - peso[b.priorita];
+    });
+
+    const task = filtrati[0];
+    const isPrioritaAlta = task.priorita === 'alta';
+
+    contenitore.innerHTML = `
+      <div class="card-task ${isPrioritaAlta ? 'priorita-alta' : ''}">
+        ${isPrioritaAlta ? '<div class="label-priorita-alta">ALTA PRIORITÀ</div>' : ''}
+        <div class="card-task-titolo titolo">${task.titolo}</div>
+        ${task.descrizione ? `<div class="card-task-desc">${task.descrizione}</div>` : ''}
+        <div>
+          ${task.contesto ? `<span class="card-task-tag">${etichettaContesto(task.contesto)}</span>` : ''}
+          ${task.energia ? `<span class="card-task-tag">${etichettaEnergia(task.energia)}</span>` : ''}
+        </div>
+        <div class="card-azioni">
+          <button class="btn-azione btn-non-ora" onclick="rifiutaTask(${task.id})">Non ora</button>
+          <button class="btn-azione btn-fatto" onclick="completaTask(${task.id})">Fatto ✓</button>
+        </div>
+      </div>
+      <button class="bottone-mostra-tutto" onclick="tornaHome()">← Torna indietro</button>
+    `;
+  }
+
+  function etichettaContesto(val) {
+    const mappa = { casa: '🏠 Casa', telefono: '📞 Al telefono', computer: '💻 Al computer', fuori: '🚶 Fuori casa', progetti: '💭 Progetti' };
+    return mappa[val] || val;
+  }
+
+  function etichettaEnergia(val) {
+    const mappa = { alta: '⚡ Energia alta', media: '🔋 Energia media', bassa: '🪫 Batteria scarica' };
+    return mappa[val] || val;
+  }
+
+  function completaTask(id) {
+    const lista = caricaTask();
+    const task = lista.find(t => t.id === id);
+    if (task) task.completato = true;
+    salvaTaskLista(lista);
+    swipeConsecutivi = 0;
+    mostraProssimoTask();
+  }
+
+  function rifiutaTask(id) {
+    const lista = caricaTask();
+    const task = lista.find(t => t.id === id);
+    if (task) task.rifiuti = (task.rifiuti || 0) + 1;
+    salvaTaskLista(lista);
+
+    swipeConsecutivi++;
+    if (swipeConsecutivi >= 5) {
+      mostraCazzeggio();
+      swipeConsecutivi = 0;
+    }
+
+    mostraProssimoTask();
+  }
+
+  function mostraCazzeggio() {
+    document.getElementById('overlay-cazzeggio').classList.add('attiva');
+  }
+
+  function chiudiCazzeggio() {
+    document.getElementById('overlay-cazzeggio').classList.remove('attiva');
+  }
+
+  function mostraTutti() {
+    filtroAttuale = null;
+    document.getElementById('schermata-home').classList.remove('attiva');
+    document.getElementById('schermata-card').classList.add('attiva');
+    mostraProssimoTask();
+  }
+
+  function tornaHome() {
+    document.getElementById('schermata-card').classList.remove('attiva');
+    document.getElementById('schermata-home').classList.add('attiva');
+  }
+
+  // ---------- SOGLIE PESO MORTO ----------
+  function sogliaPesoMorto(priorita) {
+    if (priorita === 'alta') return 2;
+    if (priorita === 'bassa') return 7;
+    return 5;
+  }
+
+  function isPesoMorto(task) {
+    return task.rifiuti >= sogliaPesoMorto(task.priorita);
+  }
+
+  // ---------- REVISIONE ----------
+  function apriRevisione() {
+    document.querySelectorAll('.schermata').forEach(s => s.classList.remove('attiva'));
+    document.getElementById('schermata-revisione').classList.add('attiva');
+    mostraRevisione();
+  }
+
+  function chiudiRevisione() {
+    document.getElementById('schermata-revisione').classList.remove('attiva');
+    document.getElementById('schermata-home').classList.add('attiva');
+  }
+
+  function mostraRevisione() {
+    const lista = caricaTask().filter(t => !t.completato && isPesoMorto(t));
+    const contenitore = document.getElementById('contenitore-revisione');
+
+    if (lista.length === 0) {
+      contenitore.innerHTML = `
+        <div class="nessun-peso-morto">
+          <p class="titolo" style="font-size:18px; margin-bottom:8px;">Tutto in ordine</p>
+          <p>Nessun task rinviato troppe volte, per ora.</p>
+        </div>
+      `;
+      return;
+    }
+
+    contenitore.innerHTML = lista.map(task => `
+      <div class="task-revisione">
+        <div class="task-revisione-titolo">${task.titolo}</div>
+        <div class="task-revisione-info">Rinviato ${task.rifiuti} volte · Priorità ${task.priorita}</div>
+        <div class="task-revisione-azioni">
+          <button class="btn-piccolo" onclick="resettaRifiuti(${task.id})">Dagli un'altra chance</button>
+          <button class="btn-piccolo elimina" onclick="eliminaTask(${task.id})">Elimina</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function resettaRifiuti(id) {
+    const lista = caricaTask();
+    const task = lista.find(t => t.id === id);
+    if (task) task.rifiuti = 0;
+    salvaTaskLista(lista);
+    mostraRevisione();
+  }
+
+  function eliminaTask(id) {
+    let lista = caricaTask();
+    lista = lista.filter(t => t.id !== id);
+    salvaTaskLista(lista);
+    mostraRevisione();
+  }
+
+  // ---------- IMPOSTAZIONI ----------
+  function apriImpostazioni() {
+    document.querySelectorAll('.schermata').forEach(s => s.classList.remove('attiva'));
+    document.getElementById('schermata-impostazioni').classList.add('attiva');
+    aggiornaStatoNotifiche();
+    aggiornaStatoBackup();
+  }
+
+  function chiudiImpostazioni() {
+    document.getElementById('schermata-impostazioni').classList.remove('attiva');
+    document.getElementById('schermata-home').classList.add('attiva');
+  }
+
+  // ---------- NOTIFICHE ----------
+  function aggiornaStatoNotifiche() {
+    const el = document.getElementById('stato-notifiche');
+    if (!('Notification' in window)) {
+      el.textContent = 'Il tuo browser non supporta le notifiche.';
+      return;
+    }
+    if (Notification.permission === 'granted') {
+      el.textContent = 'Stato: attive ✓';
+    } else if (Notification.permission === 'denied') {
+      el.textContent = 'Stato: bloccate dal browser. Riattivale dalle impostazioni del sito in Chrome.';
+    } else {
+      el.textContent = 'Stato: da attivare';
+    }
+  }
+
+  function attivaNotifiche() {
+    if (!('Notification' in window)) {
+      alert('Il tuo browser non supporta le notifiche.');
+      return;
+    }
+    Notification.requestPermission().then(permesso => {
+      aggiornaStatoNotifiche();
+      if (permesso === 'granted') {
+        new Notification('Notifiche attivate', { body: 'Ti avviserò nelle fasce orarie del pomeriggio con un task adatto.' });
+      }
+    });
+  }
+
+  const fasceOrarie = [
+    { inizio: 15 * 60, fine: 17 * 60, chiave: 'notifica_fascia1' },
+    { inizio: 17 * 60, fine: 19 * 60 + 30, chiave: 'notifica_fascia2' },
+    { inizio: 19 * 60 + 30, fine: 21 * 60, chiave: 'notifica_fascia3' }
+  ];
+
+  function oggiStringa() {
+    const d = new Date();
+    return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+  }
+
+  function taskMiglioreDisponibile() {
+    const lista = caricaTask().filter(t => !t.completato && !isPesoMorto(t) && rispettaOrario(t));
+    if (lista.length === 0) return null;
+    lista.sort((a, b) => {
+      const peso = { alta: 0, media: 1, bassa: 2 };
+      return peso[a.priorita] - peso[b.priorita];
+    });
+    return lista[0];
+  }
+
+  function controllaNotificheDaMandare() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+    const giornoSettimana = new Date().getDay();
+    if (giornoSettimana === 0 || giornoSettimana === 6) return;
+
+    const minuti = minutiAdesso();
+    const oggi = oggiStringa();
+
+    fasceOrarie.forEach(fascia => {
+      const chiaveGiorno = fascia.chiave + '_' + oggi;
+      if (minuti >= fascia.inizio && minuti < fascia.fine && !localStorage.getItem(chiaveGiorno)) {
+        const task = taskMiglioreDisponibile();
+        if (task) {
+          new Notification('Ora potresti: ' + task.titolo, {
+            body: task.descrizione || 'Tocca per aprire l\'app.'
+          });
+        }
+        localStorage.setItem(chiaveGiorno, '1');
+      }
+    });
+
+    const chiaveAlta = 'notifica_alta_' + oggi;
+    if (!localStorage.getItem(chiaveAlta)) {
+      const listaAlta = caricaTask().filter(t => !t.completato && !isPesoMorto(t) && rispettaOrario(t) && t.priorita === 'alta');
+      if (listaAlta.length > 0 && minuti >= (15 * 60)) {
+        new Notification('Priorità alta: ' + listaAlta[0].titolo, {
+          body: 'Questo task è importante, prova a farlo oggi.'
+        });
+        localStorage.setItem(chiaveAlta, '1');
+      }
+    }
+  }
+
+  setInterval(controllaNotificheDaMandare, 60 * 1000);
+
+  // ---------- BACKUP ----------
+  function scaricaBackup() {
+    const dati = caricaTask();
+    const contenuto = JSON.stringify(dati, null, 2);
+    const blob = new Blob([contenuto], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const oggi = new Date();
+    const nomeFile = 'backup-' + oggi.getFullYear() + '-' + String(oggi.getMonth() + 1).padStart(2, '0') + '-' + String(oggi.getDate()).padStart(2, '0') + '.json';
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomeFile;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    localStorage.setItem('ultimoBackup', Date.now().toString());
+    aggiornaStatoBackup();
+    aggiornaBannerBackup();
+  }
+
+  function caricaBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const dati = JSON.parse(e.target.result);
+        if (!Array.isArray(dati)) throw new Error('Formato non valido');
+
+        const confermato = confirm('Questo sostituirà tutti i task attuali con quelli del backup. Continuare?');
+        if (!confermato) return;
+
+        salvaTaskLista(dati);
+        alert('Backup caricato con successo.');
+        aggiornaStatoBackup();
+        aggiornaBannerBackup();
+      } catch (err) {
+        alert('Il file selezionato non è un backup valido.');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  function aggiornaStatoBackup() {
+    const el = document.getElementById('stato-ultimo-backup');
+    const ultimo = localStorage.getItem('ultimoBackup');
+    if (!ultimo) {
+      el.textContent = 'Non hai ancora fatto un backup.';
+      return;
+    }
+    const data = new Date(parseInt(ultimo));
+    el.textContent = 'Ultimo backup: ' + data.toLocaleDateString('it-IT') + ' alle ' + data.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function aggiornaBannerBackup() {
+    const banner = document.getElementById('banner-backup');
+    const ultimo = localStorage.getItem('ultimoBackup');
+    const setteGiorni = 7 * 24 * 60 * 60 * 1000;
+
+    if (!ultimo || (Date.now() - parseInt(ultimo)) > setteGiorni) {
+      banner.classList.add('visibile');
+    } else {
+      banner.classList.remove('visibile');
+    }
+  }
+
+  aggiornaBannerBackup();
+</script>
+
+</body>
+</html>
