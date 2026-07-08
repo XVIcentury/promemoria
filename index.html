@@ -535,7 +535,7 @@
 
     <div class="blocco-impostazioni">
       <div class="blocco-impostazioni-titolo">Backup dei tuoi dati</div>
-      <div class="blocco-impostazioni-desc">I tuoi promemoria sono salvati solo su questo telefono. Scarica un backup ogni tanto per non perderli, e caricalo se cambi dispositivo.</div>
+      <div class="blocco-impostazioni-desc">I tuoi promemoria sono salvati solo su questo dispositivo. Da computer, "Scarica backup" ti lascia scegliere la cartella (anche una cartella di Google Drive sincronizzata sul Mac). Da telefono Android, il file finisce nella cartella Download, e da lì puoi caricarlo su Drive manualmente.</div>
       <button class="btn-impostazioni principale" onclick="scaricaBackup()">Scarica backup</button>
       <button class="btn-impostazioni" onclick="document.getElementById('input-backup').click()">Carica backup</button>
       <input type="file" id="input-backup" accept="application/json" style="display:none" onchange="caricaBackup(event)">
@@ -586,6 +586,11 @@
   <div class="gruppo-label">Non proporlo prima delle... (facoltativo)</div>
   <input type="time" id="input-orario" class="campo-orario">
 
+  <label style="display:flex; align-items:center; gap:8px; margin-bottom:20px; font-size:13px; color: var(--text-soft);">
+    <input type="checkbox" id="input-notifica-forzata">
+    Mandami una notifica esattamente a quest'ora, anche fuori dai soliti orari (es. urgenza alle 11:00)
+  </label>
+
   <button class="btn-salva" onclick="salvaTask()">Salva</button>
 </div>
 
@@ -632,14 +637,36 @@
     });
   });
 
-  function resetFormCattura() {
-    document.getElementById('input-titolo').value = '';
-    document.getElementById('input-desc').value = '';
-    document.getElementById('input-orario').value = '';
-    document.querySelectorAll('#gruppo-contesto .chip, #gruppo-energia .chip').forEach(b => b.classList.remove('selezionato'));
-    document.querySelectorAll('#gruppo-priorita .chip').forEach(b => b.classList.remove('selezionato'));
-    document.querySelector('#gruppo-priorita .chip[data-val="media"]').classList.add('selezionato');
+  function controllaNotificaForzata() {
+    const minuti = minutiAdesso();
+    const lista = caricaTask().filter(t => !t.completato && t.notificaForzata && !t.notificaForzataInviata && t.orarioSpecifico);
+
+    lista.forEach(task => {
+      const [h, m] = task.orarioSpecifico.split(':').map(Number);
+      const minutiRichiesti = h * 60 + m;
+      if (minuti >= minutiRichiesti) {
+        new Notification('Promemoria: ' + task.titolo, {
+          body: task.descrizione || 'Task programmato per questo orario.'
+        });
+
+        const tutti = caricaTask();
+        const t = tutti.find(x => x.id === task.id);
+        if (t) t.notificaForzataInviata = true;
+        salvaTaskLista(tutti);
+      }
+    });
   }
+
+  function controllaNotificheDaMandare() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+    controllaNotificaForzata();
+
+    const giornoSettimana = new Date().getDay();
+    if (giornoSettimana === 0 || giornoSettimana === 6) return;
+
+    const minuti = minutiAdesso();
+    const oggi = oggiStringa();
 
   function salvaTask() {
     const titolo = document.getElementById('input-titolo').value.trim();
@@ -649,6 +676,7 @@
     }
     const desc = document.getElementById('input-desc').value.trim();
     const orario = document.getElementById('input-orario').value;
+    const notificaForzata = document.getElementById('input-notifica-forzata').checked;
     const contestoBtn = document.querySelector('#gruppo-contesto .chip.selezionato');
     const energiaBtn = document.querySelector('#gruppo-energia .chip.selezionato');
     const prioritaBtn = document.querySelector('#gruppo-priorita .chip.selezionato');
@@ -661,6 +689,8 @@
       energia: energiaBtn ? energiaBtn.dataset.val : null,
       priorita: prioritaBtn ? prioritaBtn.dataset.val : 'media',
       orarioSpecifico: orario || null,
+      notificaForzata: notificaForzata && !!orario,
+      notificaForzataInviata: false,
       rifiuti: 0,
       completato: false
     };
@@ -903,14 +933,30 @@
 
   function attivaNotifiche() {
     if (!('Notification' in window)) {
-      alert('Il tuo browser non supporta le notifiche.');
+      alert('Il tuo browser non supporta le notifiche su questo dispositivo/pagina.');
       return;
     }
+
+    if (Notification.permission === 'granted') {
+      alert('Le notifiche sono già attive.');
+      aggiornaStatoNotifiche();
+      return;
+    }
+
+    if (Notification.permission === 'denied') {
+      alert('Le notifiche sono bloccate dal browser per questo sito. Per riattivarle: tocca l\'icona del lucchetto/informazioni accanto all\'indirizzo del sito, cerca "Notifiche" e scegli "Consenti", poi ricarica la pagina.');
+      return;
+    }
+
     Notification.requestPermission().then(permesso => {
       aggiornaStatoNotifiche();
       if (permesso === 'granted') {
         new Notification('Notifiche attivate', { body: 'Ti avviserò nelle fasce orarie del pomeriggio con un task adatto.' });
+      } else {
+        alert('Non hai concesso il permesso, quindi le notifiche restano disattivate.');
       }
+    }).catch(err => {
+      alert('Errore nel richiedere il permesso: ' + err.message);
     });
   }
 
@@ -972,15 +1018,34 @@
   setInterval(controllaNotificheDaMandare, 60 * 1000);
 
   // ---------- BACKUP ----------
-  function scaricaBackup() {
+  async function scaricaBackup() {
     const dati = caricaTask();
     const contenuto = JSON.stringify(dati, null, 2);
-    const blob = new Blob([contenuto], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
 
     const oggi = new Date();
     const nomeFile = 'backup-' + oggi.getFullYear() + '-' + String(oggi.getMonth() + 1).padStart(2, '0') + '-' + String(oggi.getDate()).padStart(2, '0') + '.json';
 
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: nomeFile,
+          types: [{ description: 'File di backup', accept: { 'application/json': ['.json'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(contenuto);
+        await writable.close();
+
+        localStorage.setItem('ultimoBackup', Date.now().toString());
+        aggiornaStatoBackup();
+        aggiornaBannerBackup();
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    const blob = new Blob([contenuto], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = nomeFile;
