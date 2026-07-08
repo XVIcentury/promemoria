@@ -637,37 +637,6 @@
     });
   });
 
-  function controllaNotificaForzata() {
-    const minuti = minutiAdesso();
-    const lista = caricaTask().filter(t => !t.completato && t.notificaForzata && !t.notificaForzataInviata && t.orarioSpecifico);
-
-    lista.forEach(task => {
-      const [h, m] = task.orarioSpecifico.split(':').map(Number);
-      const minutiRichiesti = h * 60 + m;
-      if (minuti >= minutiRichiesti) {
-        new Notification('Promemoria: ' + task.titolo, {
-          body: task.descrizione || 'Task programmato per questo orario.'
-        });
-
-        const tutti = caricaTask();
-        const t = tutti.find(x => x.id === task.id);
-        if (t) t.notificaForzataInviata = true;
-        salvaTaskLista(tutti);
-      }
-    });
-  }
-
-  function controllaNotificheDaMandare() {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
-
-    controllaNotificaForzata();
-
-    const giornoSettimana = new Date().getDay();
-    if (giornoSettimana === 0 || giornoSettimana === 6) return;
-
-    const minuti = minutiAdesso();
-    const oggi = oggiStringa();
-
   function salvaTask() {
     const titolo = document.getElementById('input-titolo').value.trim();
     if (!titolo) {
@@ -981,8 +950,30 @@
     return lista[0];
   }
 
+  function controllaNotificaForzata() {
+    const minuti = minutiAdesso();
+    const lista = caricaTask().filter(t => !t.completato && t.notificaForzata && !t.notificaForzataInviata && t.orarioSpecifico);
+
+    lista.forEach(task => {
+      const [h, m] = task.orarioSpecifico.split(':').map(Number);
+      const minutiRichiesti = h * 60 + m;
+      if (minuti >= minutiRichiesti) {
+        new Notification('Promemoria: ' + task.titolo, {
+          body: task.descrizione || 'Task programmato per questo orario.'
+        });
+
+        const tutti = caricaTask();
+        const t = tutti.find(x => x.id === task.id);
+        if (t) t.notificaForzataInviata = true;
+        salvaTaskLista(tutti);
+      }
+    });
+  }
+
   function controllaNotificheDaMandare() {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+    controllaNotificaForzata();
 
     const giornoSettimana = new Date().getDay();
     if (giornoSettimana === 0 || giornoSettimana === 6) return;
