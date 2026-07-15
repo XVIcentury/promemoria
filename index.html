@@ -637,6 +637,16 @@
     });
   });
 
+  function resetFormCattura() {
+    document.getElementById('input-titolo').value = '';
+    document.getElementById('input-desc').value = '';
+    document.getElementById('input-orario').value = '';
+    document.getElementById('input-notifica-forzata').checked = false;
+    document.querySelectorAll('#gruppo-contesto .chip, #gruppo-energia .chip').forEach(b => b.classList.remove('selezionato'));
+    document.querySelectorAll('#gruppo-priorita .chip').forEach(b => b.classList.remove('selezionato'));
+    document.querySelector('#gruppo-priorita .chip[data-val="media"]').classList.add('selezionato');
+  }
+
   function salvaTask() {
     const titolo = document.getElementById('input-titolo').value.trim();
     if (!titolo) {
