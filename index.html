@@ -541,6 +541,12 @@
       <input type="file" id="input-backup" accept="application/json" style="display:none" onchange="caricaBackup(event)">
       <div class="stato-notifiche" id="stato-ultimo-backup"></div>
     </div>
+
+    <div class="blocco-impostazioni">
+      <div class="blocco-impostazioni-titolo">Azzera tutto</div>
+      <div class="blocco-impostazioni-desc">Cancella tutti i promemoria e riparte da zero. Usalo se l'app non salva più correttamente. Attenzione: è irreversibile.</div>
+      <button class="btn-impostazioni" style="color: var(--priorita-alta); border-color: var(--priorita-alta);" onclick="azzeraTutto()">Cancella tutti i dati</button>
+    </div>
   </div>
 
 </div>
@@ -891,6 +897,15 @@
     lista = lista.filter(t => t.id !== id);
     salvaTaskLista(lista);
     mostraRevisione();
+  }
+
+  function azzeraTutto() {
+    const conferma = confirm('Sicuro? Verranno cancellati TUTTI i promemoria in modo irreversibile.');
+    if (!conferma) return;
+    localStorage.setItem('tasks', '[]');
+    alert('Fatto. Tutti i dati sono stati azzerati.');
+    document.querySelectorAll('.schermata').forEach(s => s.classList.remove('attiva'));
+    document.getElementById('schermata-home').classList.add('attiva');
   }
 
   // ---------- IMPOSTAZIONI ----------
