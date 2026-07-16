@@ -824,10 +824,65 @@
   }
 
   function mostraTutti() {
-    filtroAttuale = null;
-    document.getElementById('schermata-home').classList.remove('attiva');
+    document.querySelectorAll('.schermata').forEach(s => s.classList.remove('attiva'));
     document.getElementById('schermata-card').classList.add('attiva');
-    mostraProssimoTask();
+
+    const lista = caricaTask().filter(t => !t.completato && !isPesoMorto(t));
+    const contenitore = document.getElementById('contenitore-card');
+
+    if (lista.length === 0) {
+      contenitore.innerHTML = `
+        <div class="nessun-task">
+          <p class="titolo" style="font-size:18px; margin-bottom:8px;">Nessun promemoria</p>
+          <p>Non hai promemoria attivi al momento.</p>
+          <button class="bottone-mostra-tutto" onclick="tornaHome()">← Torna indietro</button>
+        </div>
+      `;
+      return;
+    }
+
+    lista.sort((a, b) => {
+      const peso = { alta: 0, media: 1, bassa: 2 };
+      return peso[a.priorita] - peso[b.priorita];
+    });
+
+    contenitore.innerHTML = `
+      <div class="header-schermata" style="margin-top:10px;">
+        <button class="btn-indietro" onclick="tornaHome()">←</button>
+        <div class="titolo" style="font-size:20px;">Tutti i promemoria</div>
+      </div>
+    ` + lista.map(task => {
+      const isAlta = task.priorita === 'alta';
+      return `
+        <div class="task-revisione" style="${isAlta ? 'border:2px solid var(--priorita-alta);' : ''}">
+          ${isAlta ? '<div class="label-priorita-alta">ALTA PRIORITÀ</div>' : ''}
+          <div class="task-revisione-titolo">${task.titolo}</div>
+          ${task.descrizione ? `<div class="task-revisione-info">${task.descrizione}</div>` : ''}
+          <div class="task-revisione-info">
+            ${task.contesto ? etichettaContesto(task.contesto) + ' · ' : ''}${task.energia ? etichettaEnergia(task.energia) + ' · ' : ''}Priorità ${task.priorita}
+          </div>
+          <div class="task-revisione-azioni">
+            <button class="btn-piccolo" onclick="completaTaskDaLista(${task.id})">Fatto ✓</button>
+            <button class="btn-piccolo elimina" onclick="eliminaTaskDaLista(${task.id})">Elimina</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function completaTaskDaLista(id) {
+    const lista = caricaTask();
+    const task = lista.find(t => t.id === id);
+    if (task) task.completato = true;
+    salvaTaskLista(lista);
+    mostraTutti();
+  }
+
+  function eliminaTaskDaLista(id) {
+    let lista = caricaTask();
+    lista = lista.filter(t => t.id !== id);
+    salvaTaskLista(lista);
+    mostraTutti();
   }
 
   function tornaHome() {
