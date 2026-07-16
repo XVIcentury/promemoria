@@ -545,6 +545,10 @@
 
 </div>
 
+<div style="text-align:center; padding: 20px; font-weight:bold; color: var(--text-soft); font-size:13px;">
+  Questa app funziona solo su telefono
+</div>
+
 <!-- BOTTONE + FISSO -->
 <button class="bottone-piu" onclick="apriCattura()">+</button>
 <button class="bottone-revisione" onclick="apriRevisione()">📋</button>
@@ -605,7 +609,15 @@
   // ---------- GESTIONE DATI (LocalStorage) ----------
   function caricaTask() {
     const dati = localStorage.getItem('tasks');
-    return dati ? JSON.parse(dati) : [];
+    if (!dati) return [];
+    try {
+      const parsed = JSON.parse(dati);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+      alert('I dati salvati risultavano corrotti e sono stati azzerati.');
+      localStorage.setItem('tasks', '[]');
+      return [];
+    }
   }
 
   function salvaTaskLista(lista) {
